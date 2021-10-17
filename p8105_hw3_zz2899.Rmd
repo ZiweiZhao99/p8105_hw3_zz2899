@@ -51,14 +51,10 @@ There are `r nrow(grouped_by_aisle)` aisles. Most items are ordered from package
 filter(grouped_by_aisle, n_obs>10000) %>% 
   ggplot(aes(x = aisle, y = n_obs)) + 
   geom_col()+
-  theme(axis.text.x = element_text(angle = 90, hjust = 0.5, vjust = 0.5))+
-  knitr::opts_chunk$set(
-  fig.width = 6,
-  fig.asp = .6,
-  out.width = "90%"
-)
+  theme(axis.text.x = element_text(angle = 90, hjust = 0.5, vjust = 0.5))
 ```
-By look at the plot, we can get the same conclusion as in part 1: most items are ordered from packaged vegetables fruits, fresh vegetables, and fresh fruits.
+
+By looking at the plot, we can get the same conclusion as in part 1: most items are ordered from packaged vegetables fruits, fresh vegetables, and fresh fruits.
 
 
 **3.** Make a table showing the three most popular items in each of the aisles “baking ingredients”, “dog food care”, and “packaged vegetables fruits”. Include the number of times each item is ordered in your table.
@@ -98,6 +94,7 @@ bind_rows(baking_ingredients, dog_food_care, package_vegetable_fruits)%>%
   select(aisle, everything())%>% 
   knitr::kable()
 ```
+
 Number of orders of top three most popular items of the aisle "packaged vegetables fruits" is much higher than that of "baking ingredients" and "dog food care", among which "dog food care" has the lowest number of orders.
 
 
