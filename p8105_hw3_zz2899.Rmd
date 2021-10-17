@@ -1,0 +1,228 @@
+---
+title: "Homework 3"
+author: "Zoey Zhao"
+date: "10/16/2021"
+output: github_document
+---
+Load packages, install `p8105.datasets`, and set the theme for plots.
+```{r message = FALSE}
+library(tidyverse)
+#install.packages("p8105.datasets")
+library(p8105.datasets)
+library(ggplot2)
+
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "90%"
+)
+
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+```
+## Problem 1
+The data set `instacart` has `r length(instacart)` observations including the `r names(instacart)`. It has a total of `r nrow(instacart)` rows and `r ncol(instacart)` columns. `reordered` is a numeric variable that only has 1 and 0. `eval_set` is a character variable that only has "train". `product_name` is a character variable that represents names of products (e.g. Grated Pecorino Romano Cheese). `aisle` is a character variable (e.g. specialty cheeses). `department` is also a character variable with 21 different types (e.g. dairy eggs). Others are all numeric variables with different ranges.
+
+**1.** How many aisles are there, and which aisles are the most items ordered from?
+```{r}
+data("instacart")
+
+grouped_by_aisle <- 
+  instacart %>%
+  group_by(aisle) %>%
+  summarize(n_obs = n())
+
+#Show top 5 aisles with most items ordered
+arrange(grouped_by_aisle, n_obs)%>%
+  tail(n = 5)%>% 
+  knitr::kable()
+```
+There are `r nrow(grouped_by_aisle)` aisles. Most items are ordered from packaged vegetables fruits, fresh vegetables, and fresh fruits.
+
+**2.** Make a plot that shows the number of items ordered in each aisle, limiting this to aisles with more than 10000 items ordered. Arrange aisles sensibly, and organize your plot so others can read it.
+```{r}
+filter(grouped_by_aisle, n_obs>10000) %>% 
+  ggplot(aes(x = aisle, y = n_obs)) + 
+  geom_col()+
+  theme(axis.text.x = element_text(angle = 90, hjust = 0.5, vjust = 0.5))+
+  knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "90%"
+)
+```
+By look at the plot, we can get the same conclusion as in part 1: most items are ordered from packaged vegetables fruits, fresh vegetables, and fresh fruits.
+
+
+**3.** Make a table showing the three most popular items in each of the aisles “baking ingredients”, “dog food care”, and “packaged vegetables fruits”. Include the number of times each item is ordered in your table.
+```{r}
+#Find three most popular items in baking ingredients
+baking_ingredients <- 
+  instacart %>%
+  filter(aisle == "baking ingredients") %>%
+  group_by(product_name) %>%
+  summarize(number_ordered = n()) %>%
+  arrange(number_ordered) %>%
+  tail(n = 3) %>%
+  mutate(aisle = "baking ingredients")
+
+#Find three most popular items in dog food care
+dog_food_care <- 
+  instacart %>%
+  filter(aisle == "dog food care") %>%
+  group_by(product_name) %>%
+  summarize(number_ordered = n()) %>%
+  arrange(number_ordered) %>%
+  tail(n = 3) %>%
+  mutate(aisle = "dog food care")
+
+#Find three most popular items in packaged vegetables fruits
+package_vegetable_fruits<- 
+  instacart %>%
+  filter(aisle == "packaged vegetables fruits") %>%
+  group_by(product_name) %>%
+  summarize(number_ordered = n()) %>%
+  arrange(number_ordered) %>%
+  tail(n = 3) %>%
+  mutate(aisle = "packaged vegetables fruits")
+
+#Make a table
+bind_rows(baking_ingredients, dog_food_care, package_vegetable_fruits)%>%
+  select(aisle, everything())%>% 
+  knitr::kable()
+```
+Number of orders of top three most popular items of the aisle "packaged vegetables fruits" is much higher than that of "baking ingredients" and "dog food care", among which "dog food care" has the lowest number of orders.
+
+
+**4.** Make a table showing the mean hour of the day at which Pink Lady Apples and Coffee Ice Cream are ordered on each day of the week; format this table for human readers (i.e. produce a 2 x 7 table).
+
+```{r}
+#Find the mean hour of the day at which Pink Lady Apples are ordered on each day of the week
+Pink_Lady_Apples <-
+  instacart %>%
+  filter(product_name == "Pink Lady Apples") %>%
+  group_by(order_dow) %>%
+  summarize(mean_hour = mean(order_hour_of_day)) %>%
+  mutate(order_dow = case_when(
+    order_dow == 0 ~ "Sunday",
+    order_dow == 1 ~ "Monday",
+    order_dow == 2 ~ "Tuesday",
+    order_dow == 3 ~ "Wednesday",
+    order_dow == 4 ~ "Thursday",
+    order_dow == 5 ~ "Friday",
+    order_dow == 6 ~ "Saturday",
+  )) %>%
+  mutate(product_name = "Pink Lady Apples")
+
+#Find the mean hour of the day at which Coffee Ice Cream are ordered on each day of the week
+Coffee_Ice_Cream <-
+  instacart %>%
+  filter(product_name == "Coffee Ice Cream") %>%
+  group_by(order_dow) %>%
+  summarize(mean_hour = mean(order_hour_of_day)) %>%
+  mutate(order_dow = case_when(
+    order_dow == 0 ~ "Sunday",
+    order_dow == 1 ~ "Monday",
+    order_dow == 2 ~ "Tuesday",
+    order_dow == 3 ~ "Wednesday",
+    order_dow == 4 ~ "Thursday",
+    order_dow == 5 ~ "Friday",
+    order_dow == 6 ~ "Saturday",
+  )) %>%
+  mutate(product_name = "Coffee Ice Cream")
+
+#Make a table
+bind_rows(Pink_Lady_Apples, Coffee_Ice_Cream)%>%
+  pivot_wider(names_from = "order_dow", values_from = "mean_hour")%>%
+   knitr::kable(digit = 2)
+```
+The mean hour of the day that Pink Lady Apple is ordered is the smallest on Tuesday and largest on Wednesday. The mean hour of the day that Coffee Ice Cream is ordered is the smallest on Tuesday and largest on Friday and largest on Tuesday. Among each day of the week, the mean hour that Coffee Ice Cream is ordered is almost always larger than Pink Lady Apple is ordered (except Firday).
+
+## Problem 2
+First, do some data cleaning:
+```{r}
+data("brfss_smart2010")
+
+tidyBRFSS <-
+  brfss_smart2010 %>%
+  #use appropriate variable names
+  janitor::clean_names()%>%
+  mutate(state = locationabbr)%>%
+  select(-locationabbr)%>%
+  #focus on the “Overall Health” topic
+  filter(topic == "Overall Health")%>%
+  #include only responses from “Excellent” to “Poor” (this step is not necessary because it makes no changes)
+  filter(response == "Excellent" |
+           response == "Very good" |
+           response == "Good" |
+           response == "Fair" |
+           response == "Poor")%>%
+  #organize responses as a factor taking levels ordered from “Poor” to “Excellent”
+  mutate(response = as.factor(response))
+```
+
+**1.** In 2002, which states were observed at 7 or more locations? What about in 2010?
+```{r message=FALSE}
+In2002 <-
+  filter(tidyBRFSS, year == 2002)%>%
+  group_by(state, locationdesc)%>%
+  summarize()%>%
+  distinct()%>%
+  group_by(state)%>%
+  summarize(count=n())%>%
+  filter(count >= 7)%>%
+  knitr::kable()
+In2002
+```
+
+```{r message=FALSE}
+In2010 <-
+  filter(tidyBRFSS, year == 2010)%>%
+  group_by(state, locationdesc)%>%
+  summarize()%>%
+  distinct()%>%
+  group_by(state)%>%
+  summarize(count=n())%>%
+  filter(count >= 7)%>%
+  knitr::kable()
+In2010
+```
+
+**2.** Construct a dataset that is limited to `Excellent` responses, and contains, year, state, and a variable that averages the `data_value` across locations within a state. Make a "spaghetti" plot of this average value over time within a state (that is, make a plot showing a line for each state across years – the `geom_line` geometry and `group` aesthetic will help).
+
+```{r}
+ExcellentResp <-
+  filter(tidyBRFSS, response == 'Excellent')%>%
+  group_by(state, year)%>%
+  summarize(state_average = mean(data_value))
+
+  
+ExcellentResp%>%
+  ggplot(aes(x = year, y = state_average, color = state)) + 
+    geom_point() + geom_line() + 
+    theme(legend.position = "right")
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
