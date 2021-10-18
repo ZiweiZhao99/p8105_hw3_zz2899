@@ -216,12 +216,63 @@ filter(tidyBRFSS, year == 2006 | year == 2010)%>%
   ggplot(aes(x = data_value , color = response, fill = response)) +
   geom_density(alpha = .5) + 
   facet_grid(~year) + 
+  scale_x_continuous(limits = c(0, 50)) +
   viridis::scale_fill_viridis(discrete = TRUE)
 ```
 
+## Problem 3
+**1.** Load, tidy, and otherwise wrangle the data. Your final dataset should include all originally observed variables and values; have useful variable names; include a weekday vs weekend variable; and encode data with reasonable variable classes. Describe the resulting dataset (e.g. what variables exist, how many observations, etc).
 
+```{r message=FALSE}
+accel_data <- 
+  read_csv("./data/accel_data.csv")%>%
+  janitor::clean_names()%>%
+  pivot_longer(activity_1:activity_1440,
+               names_to = "activity_counts",
+               values_to = "activity")%>%
+  separate(activity_counts, into = c("nothing", "activity_counts"), sep = "_")%>%
+  select(-nothing)%>%
+  mutate(activity_counts = as.numeric(activity_counts))%>%
+  #add a weekday vs weekend variabl
+  mutate(weekday_vs_weekend = ifelse(day == "Saturday" | day == "Sunday",  
+                                     "weekend", 
+                                     "weekday"))%>%
+  mutate(weekday_vs_weekend = as.factor(weekday_vs_weekend))
+```
 
+The resulting data set `accel_dataa` has `r length(accel_data)` observations including the `r names(accel_data)`. `day` is a character variable, `weekday_vs_weekend` is a factor variable containing only `weekday` and `weekend`, other variables are all numeric.
 
+**2.** Traditional analyses of accelerometer data focus on the total activity over the day. Using your tidied dataset, aggregate across minutes to create a total activity variable for each day, and create a table showing these totals. Are any trends apparent?
+
+```{r}
+accel_data%>%
+  group_by(day_id)%>%
+  summarize(total_daily_acvitity = sum(activity))%>%
+  knitr::kable()
+```
+
+No obvious trends.
+
+**3.** Accelerometer data allows the inspection activity over the course of the day. Make a single-panel plot that shows the 24-hour activity time courses for each day and use color to indicate day of the week. Describe in words any patterns or conclusions you can make based on this graph.
+
+```{r message=FALSE}
+accel_data%>%
+  group_by(activity_counts, day)%>%
+  summarize(mean_activity = mean(activity))%>%
+  ggplot(aes(x = activity_counts, y = mean_activity, color = day, fill = day))+
+  geom_smooth(se = FALSE) +
+  scale_x_continuous(
+    breaks = c(0, 120, 240, 360, 480, 600, 720, 840, 960, 1080, 1200, 1320, 1440), 
+    labels = c("0", "2", "4", "6", "8", "10", "12", "14", "16", "18", "20", "22", "24"),
+    limits = c(0, 1440)) +
+  labs(
+    title = "Activity over the day",
+    x = "Hours",
+    y = "Mean Activity",
+    caption = "Data from the rnoaa package")
+```
+
+Activities are often lower before 6 am and after 11pm.
 
 
 
