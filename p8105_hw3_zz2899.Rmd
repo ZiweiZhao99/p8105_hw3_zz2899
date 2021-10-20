@@ -91,7 +91,7 @@ package_vegetable_fruits<-
 
 #Make a table
 bind_rows(baking_ingredients, dog_food_care, package_vegetable_fruits)%>%
-  select(aisle, everything())%>% 
+  select(product_name, aisle, everything())%>% 
   knitr::kable()
 ```
 
@@ -257,9 +257,7 @@ No obvious trends.
 
 ```{r message=FALSE}
 accel_data%>%
-  group_by(activity_counts, day)%>%
-  summarize(mean_activity = mean(activity))%>%
-  ggplot(aes(x = activity_counts, y = mean_activity, color = day, fill = day))+
+  ggplot(aes(x = activity_counts, y = activity, color = day, fill = day))+
   geom_smooth(se = FALSE) +
   scale_x_continuous(
     breaks = c(0, 120, 240, 360, 480, 600, 720, 840, 960, 1080, 1200, 1320, 1440), 
@@ -268,11 +266,10 @@ accel_data%>%
   labs(
     title = "Activity over the day",
     x = "Hours",
-    y = "Mean Activity",
-    caption = "Data from the rnoaa package")
+    y = "Activity")
 ```
 
-Activities are often lower before 6 am and after 11pm.
+Activities are often lower before 6 am and after 11pm. In general, activities at Sunday moon are higher than other days; activities at Friday night are higher than other days.
 
 
 
