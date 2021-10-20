@@ -51,7 +51,10 @@ There are `r nrow(grouped_by_aisle)` aisles. Most items are ordered from package
 filter(grouped_by_aisle, n_obs>10000) %>% 
   ggplot(aes(x = aisle, y = n_obs)) + 
   geom_col()+
-  theme(axis.text.x = element_text(angle = 90, hjust = 0.5, vjust = 0.5))
+  theme(axis.text.x = element_text(angle = 90, hjust = 0.5, vjust = 0.5))+
+  labs(title = "Number of Items Ordered in Each Aisle",
+       x = "Aisle",
+       y = "Number of items ordered")
 ```
 
 By looking at the plot, we can get the same conclusion as in part 1: most items are ordered from packaged vegetables fruits, fresh vegetables, and fresh fruits.
@@ -166,6 +169,8 @@ tidyBRFSS <-
 ```
 
 **1.** In 2002, which states were observed at 7 or more locations? What about in 2010?
+
+States that were observed at 7 or more locations in 2002:
 ```{r message=FALSE}
 In2002 <-
   filter(tidyBRFSS, year == 2002)%>%
@@ -179,6 +184,7 @@ In2002 <-
 In2002
 ```
 
+States that were observed at 7 or more locations in 2010:
 ```{r message=FALSE}
 In2010 <-
   filter(tidyBRFSS, year == 2010)%>%
@@ -203,12 +209,15 @@ ExcellentResp <-
   
 ExcellentResp%>%
   ggplot(aes(x = year, y = state_average, color = state)) + 
-    geom_point() + geom_line() + 
-    theme(legend.position = "right")
+  geom_point() + geom_line() + 
+  theme(legend.position = "right") + 
+  labs(title = "Average data_values over Time in States",
+       x = "Year",
+       y = "State Average")
 
 ```
 
-**3.**Make a two-panel plot showing, for the years 2006, and 2010, distribution of `data_value` for responses (“Poor” to “Excellent”) among locations in NY State.
+**3.** Make a two-panel plot showing, for the years 2006, and 2010, distribution of `data_value` for responses (“Poor” to “Excellent”) among locations in NY State.
 ```{r}
 filter(tidyBRFSS, year == 2006 | year == 2010)%>%
   filter(state == "NY")%>%
@@ -217,7 +226,8 @@ filter(tidyBRFSS, year == 2006 | year == 2010)%>%
   geom_density(alpha = .5) + 
   facet_grid(~year) + 
   scale_x_continuous(limits = c(0, 50)) +
-  viridis::scale_fill_viridis(discrete = TRUE)
+  viridis::scale_fill_viridis(discrete = TRUE) +
+  labs(title = "Distribution of data_value in NY")
 ```
 
 ## Problem 3
@@ -257,14 +267,14 @@ No obvious trends.
 
 ```{r message=FALSE}
 accel_data%>%
-  ggplot(aes(x = activity_counts, y = activity, color = day, fill = day))+
+  ggplot(aes(x = activity_counts, y = activity, color = day))+
   geom_smooth(se = FALSE) +
   scale_x_continuous(
     breaks = c(0, 120, 240, 360, 480, 600, 720, 840, 960, 1080, 1200, 1320, 1440), 
     labels = c("0", "2", "4", "6", "8", "10", "12", "14", "16", "18", "20", "22", "24"),
     limits = c(0, 1440)) +
   labs(
-    title = "Activity over the day",
+    title = "Activity over the Day",
     x = "Hours",
     y = "Activity")
 ```
